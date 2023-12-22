@@ -1,0 +1,156 @@
+{% load static %}
+{% load django_htmx %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Todo</title>
+
+    <link rel="stylesheet" type="text/css" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,600;0,700;0,800;1,300;1,400;1,600;1,700;1,800&amp;display=swap">
+    <link rel="stylesheet" type="text/css" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.standalone.min.css">
+
+
+    <link rel="stylesheet" type="text/css" href="{% static 'htmx_todo_app/css/style.css' %}">
+</head>
+<body>
+<div class="container m-5 p-2 rounded mx-auto bg-light shadow">
+    <!-- App title section -->
+    <div class="row m-1 p-4">
+        <div class="col">
+            <div class="p-1 h1 text-primary text-center mx-auto display-inline-block">
+                <i class="fa fa-check bg-primary text-white rounded p-2"></i>
+                <u>My Todo-s</u>
+            </div>
+        </div>
+    </div>
+    <!-- Create todo section -->
+<form hx-post="{% url 'htmx_todo_app_add_item' %}"  hx-target="#item_list" hx-swap="innerHtml">
+    {% csrf_token %}
+    <div class="row m-1 p-3">
+    <div class="col col-12 mx-auto">
+        <div class="row bg-white rounded shadow-sm p-2 add-todo-wrapper align-items-center justify-content-center">
+            <div class="col">
+                <div class="mb-3">
+                    <label for="title" class="form-label">Add Item</label>
+                    <input id="title" name="title" class="form-control" type="text" placeholder="Add Item" required>
+                </div>
+            </div>
+            <div class="col">
+                <div class="mb-3">
+                    <label for="due_date" class="form-label">Due Date</label>
+                    <input type="date" id="due_date" name="due_date" class="form-control" placeholder="Due Date">
+                </div>
+            </div>
+            <div class="col-auto m-0 px-2 d-flex align-items-center">
+                <!-- Remove unnecessary icons -->
+            </div>
+            <div class="col-auto px-0 mx-0 mr-2">
+                <button type="submit" class="btn btn-primary">Add</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% comment %}    <div class="row m-1 p-3">
+    <div class="col col-11 mx-auto">
+        <div class="row bg-white rounded shadow-sm p-2 add-todo-wrapper align-items-center justify-content-center">
+            <div class="col">
+                <div class="d-flex flex-column">
+                    <label for="titleInput" class="mb-1">Title:</label>
+                    <input id="titleInput" class="form-control form-control-lg border-0 add-todo-input bg-transparent rounded" name="title" type="text" placeholder="Add new ..">
+                </div>
+            </div>
+            <div class="col">
+                <div class="d-flex flex-column">
+                    <label for="dueDateInput" class="mb-1">Due Date:</label>
+                    <input id="dueDateInput" class="form-control form-control-lg border-0 add-todo-input bg-transparent rounded" type="date" placeholder="Due date">
+                </div>
+            </div>
+            <div class="col-auto m-0 px-2 d-flex align-items-center">
+                <!-- Remove unnecessary icons -->
+            </div>
+            <div class="col-auto px-0 mx-0 mr-2">
+                <button type="submit" class="btn btn-primary">Add</button>
+            </div>
+        </div>
+    </div>
+</div>
+   {% endcomment %}
+
+    {% comment %}
+<div class="row m-1 p-3">
+    <div class="col col-11 mx-auto">
+        <div class="row bg-white rounded shadow-sm p-2 add-todo-wrapper align-items-center justify-content-center">
+            <div class="col">
+                <div class="d-flex">
+                    <input class="form-control form-control-lg border-0 add-todo-input bg-transparent rounded" name="title" type="text" placeholder="Add new ..">
+                    <input id="dueDateInput" class="form-control form-control-lg border-0 add-todo-input bg-transparent rounded" type="date" placeholder="Due date">
+                </div>
+            </div>
+            <div class="col">
+
+            </div>
+            <div class="col-auto m-0 px-2 d-flex align-items-center">
+                <label class="text-secondary my-2 p-0 px-1 view-opt-label due-date-label d-none">Due date not set</label>
+                <i class="fa fa-calendar my-2 px-1 text-primary btn due-date-button" data-toggle="tooltip" data-placement="bottom" title="Set a Due date"></i>
+                <i class="fa fa-calendar-times-o my-2 px-1 text-danger btn clear-due-date-button d-none" data-toggle="tooltip" data-placement="bottom" title="Clear Due date"></i>
+            </div>
+            <div class="col-auto px-0 mx-0 mr-2">
+                <button type="submit" class="btn btn-primary">Add</button>
+            </div>
+        </div>
+    </div>
+</div>
+    </div>{% endcomment %}
+</form>
+    <div class="p-2 mx-4 border-black-25 border-bottom"></div>
+    <!-- View options section -->
+    <div class="row m-1 p-3 px-5 justify-content-end">
+        <div class="col-auto d-flex align-items-center">
+            <label class="text-secondary my-2 pr-2 view-opt-label">Filter</label>
+            <select class="custom-select custom-select-sm btn my-2"  name="to_status_filter" hx-get="{% url 'htmx_todo_app_management' %}" hx-trigger="change" hx-target="#item_list" hx-swap="innerHtml">
+                <option value="0">ALL</option>
+                <option value="completed">Completed</option>
+                <option value="active">Active</option>
+            {% comment %}    <option value="has-due-date">Has due date</option>{% endcomment %}
+            </select>
+        </div>
+        <div class="col-auto d-flex align-items-center px-1 pr-3">
+            <label class="text-secondary my-2 pr-2 view-opt-label">Sort</label>
+            <select class="custom-select custom-select-sm btn my-2"  name="sorting_with_date" hx-get="{% url 'htmx_todo_app_management' %}" hx-trigger="change" hx-target="#item_list" hx-swap="innerHtml">
+                {% comment %}<option value="0">ALL</option>{% endcomment %}
+                 <option value="created-date-asc" selected>Added date</option>
+                <option value="due-date-desc">Due date</option>
+            {% comment %}    <option value="has-due-date">Has due date</option>{% endcomment %}
+            </select>
+            <i class="fa fa fa-sort-amount-asc text-info btn mx-0 px-0 pl-1" data-toggle="tooltip" data-placement="bottom" title="Ascending"></i>
+            <i class="fa fa fa-sort-amount-desc text-info btn mx-0 px-0 pl-1 d-none" data-toggle="tooltip" data-placement="bottom" title="Descending"></i>
+        </div>
+    </div>
+    </form>
+    <!-- Todo list section -->
+    <div class="row mx-1 px-5 pb-3 w-80" hx-get="{% url 'htmx_todo_app_management' %}" hx-trigger="#item_list"  hx-swap="innerHtml">
+        <div class="col mx-auto" id="item_list">
+            <!-- Todo Item 1 -->
+            {% include 'htmx_todo_app/partials/index.html' %}
+
+        </div>
+    </div>
+</div>
+    <script src="https://unpkg.com/htmx.org@1.9.10" integrity="sha384-D1Kt99CQMDuVetoL1lrYwg5t+9QdHe7NLX/SoJYkXDFfX37iInKRy5xLSi8nO7UC" crossorigin="anonymous"></script>
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
+    <script type="text/javascript" src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="https://stackpath.bootstrapcdn.com/bootlint/1.1.0/bootlint.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js"></script>
+    <script type="text/javascript" src="{% static 'htmx_todo_app/Js/script.js' %}"></script>
+
+
+</body>
+</html>
+
+
+
