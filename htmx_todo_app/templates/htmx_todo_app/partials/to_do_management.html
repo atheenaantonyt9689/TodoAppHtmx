@@ -28,9 +28,10 @@
             <div class="col-auto m-1 p-0 ">
                     <div class="row d-flex align-items-center justify-content-end">
                         <h5 class="m-0 p-0 px-2">
-                            <a >
+                            {% comment %}TODO need to correct data-toggle="modal" data-target="#exampleModal"{% endcomment %}
+                           {% comment %} <a  hx-get= {% url 'htmx_todo_app_update' item.id %}  >
                             <i class="fa fa-pencil text-info btn m-0 p-0" data-toggle="tooltip" data-placement="bottom" title="Edit todo"></i>
-                            </a></h5>
+                            </a></h5>{% endcomment %}
                         <a  hx-get="{% url 'htmx_todo_app_delete' item.pk %}" hx-confirm="Are you sure you want to delete this {{ item.title }}?"
                                hx-target="#item_list" hx-swap="innerHtml" >
                         <h5 class="m-0 p-0 px-2">
@@ -50,6 +51,12 @@
                 </div>
 
             </div>
+   {% comment %} <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal" >Open modal for @mdo</button>{% endcomment %}
+
+
+
+
 
 
             {% endfor %}
+

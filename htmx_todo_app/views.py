@@ -103,7 +103,7 @@ def update_status(request, pk):
     context['object_list'] = TodoItem.objects.all()
     return render(request, 'htmx_todo_app/partials/to_do_management.html', context=context)
 
-
+# TODO need to correct
 class TodoUpdateView(UpdateView):
     template_name = 'htmx_todo_app/update_to_do.html'
     model = TodoItem
@@ -116,27 +116,24 @@ class TodoUpdateView(UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-
-        company_group_obj = self.get_object()
         return context
 
     def get(self, request, *args, **kwargs):
         if request.htmx:
             context = {}
-            group_id = self.kwargs.get('id')
-
+            to_id = self.kwargs.get('id')
             print("Get worked within the hTmsx request")
-            context['form'] = TodoItemForm(instance=TodoItem.objects.get(id=group_id))
-            context['group_id'] = group_id
+            context['form'] = TodoItemForm(instance=TodoItem.objects.get(id=to_id))
+            context['to_id'] = to_id
 
-            return render(request, 'htmx_todo_app/update_to_do.html', context=context)
+            return render(request, 'htmx_todo_app/partials/to_do_update_modal.html', context=context)
         return super().get(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
         if request.htmx:
             print("Post worked within the hTmsx request")
-            group_id = self.kwargs.get('id')
-            form = TodoItemForm(request.POST, instance=TodoItemForm.objects.get(id=group_id))
+            to_id = self.kwargs.get('id')
+            form = TodoItemForm(request.POST, instance=TodoItemForm.objects.get(id=to_id))
             form.save()
-            return HttpResponseClientRefresh()
+
         return super().post(request, *args, **kwargs)
