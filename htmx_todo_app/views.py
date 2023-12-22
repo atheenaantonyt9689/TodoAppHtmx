@@ -74,7 +74,9 @@ def add_to_items(request):
         due_date = request.POST.get('due_date')
         print("due_date ", due_date)
         if len(to_item) > 0:
-            to_do_obj = TodoItem.objects.create(title=to_item,due_date=due_date)
+            to_do_obj = TodoItem.objects.create(title=to_item)
+            if due_date:
+                to_do_obj.due_date = due_date
             to_do_obj.save()
         context['object_list'] = TodoItem.objects.all()
     return render(request, 'htmx_todo_app/partials/to_do_management.html', context=context)
