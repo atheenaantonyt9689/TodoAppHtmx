@@ -29,12 +29,12 @@ class IndexView(TemplateView):
             print("htmx request")
             to_do_list = TodoItem.objects.all()
             context = {'to_do_list': to_do_list}
-            return render(request, 'htmx_todo_app/partials/index.html', context)
+            return render(request, 'htmx_todo_app/partials/to_do_management.html', context)
         return super().get(request, *args, **kwargs)
 
 
 class TodoManagementView(ListView):
-    template_name = 'htmx_todo_app/test.html'
+    template_name = 'htmx_todo_app/to_do_management.html'
     model = TodoItem
     paginate_by = 5
 
@@ -61,7 +61,7 @@ class TodoManagementView(ListView):
                     to_dos = to_dos.order_by('-due_date')
                 if sorting_with_date == 'created-date-asc':
                     to_dos = to_dos.order_by('created')
-            self.template_name = 'htmx_todo_app/partials/index.html'
+            self.template_name = 'htmx_todo_app/partials/to_do_management.html'
         return to_dos
 
 
@@ -77,7 +77,7 @@ def add_to_items(request):
             to_do_obj = TodoItem.objects.create(title=to_item,due_date=due_date)
             to_do_obj.save()
         context['object_list'] = TodoItem.objects.all()
-    return render(request, 'htmx_todo_app/partials/index.html', context=context)
+    return render(request, 'htmx_todo_app/partials/to_do_management.html', context=context)
 
 
 def delete_to_item(request, pk):
@@ -86,7 +86,7 @@ def delete_to_item(request, pk):
     if pk:
         TodoItem.objects.filter(id=pk).delete()
     context['object_list'] = TodoItem.objects.all()
-    return render(request, 'htmx_todo_app/partials/index.html', context=context)
+    return render(request, 'htmx_todo_app/partials/to_do_management.html', context=context)
 
 
 def update_status(request, pk):
@@ -101,7 +101,7 @@ def update_status(request, pk):
 
         todo_obj.save()
     context['object_list'] = TodoItem.objects.all()
-    return render(request, 'htmx_todo_app/partials/index.html', context=context)
+    return render(request, 'htmx_todo_app/partials/to_do_management.html', context=context)
 
 
 class TodoUpdateView(UpdateView):
