@@ -105,37 +105,17 @@ def update_status(request, pk):
     context['object_list'] = TodoItem.objects.all()
     return render(request, 'htmx_todo_app/partials/to_do_management.html', context=context)
 
-# TODO need to correct
-class TodoUpdateView(UpdateView):
-    template_name = 'htmx_todo_app/update_to_do.html'
-    model = TodoItem
-    form_class = TodoItemForm
-    success_url = reverse_lazy('htmx_todo_app_management')
 
-    def get_object(self, queryset=None):
-        id = self.kwargs.get('id')
-        return self.model.objects.get(id=id)
+def update_to_do_item_title_and_due_date(request, id):
+    print("update_status")
+    context = {}
+    if id:
+        todo_obj = TodoItem.objects.filter(id=id).first()
+        title = request.GET.get('todo_name')
+        if len(title) > 0:
+            todo_obj.title = title
+        todo_obj.save()
+    print("Title savedd successfully")
+    context['object_list'] = TodoItem.objects.all()
+    return render(request, 'htmx_todo_app/partials/to_do_management.html', context=context)
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        return context
-
-    def get(self, request, *args, **kwargs):
-        if request.htmx:
-            context = {}
-            to_id = self.kwargs.get('id')
-            print("Get worked within the hTmsx request")
-            context['form'] = TodoItemForm(instance=TodoItem.objects.get(id=to_id))
-            context['to_id'] = to_id
-
-            return render(request, 'htmx_todo_app/partials/to_do_update_modal.html', context=context)
-        return super().get(request, *args, **kwargs)
-
-    def post(self, request, *args, **kwargs):
-        if request.htmx:
-            print("Post worked within the hTmsx request")
-            to_id = self.kwargs.get('id')
-            form = TodoItemForm(request.POST, instance=TodoItemForm.objects.get(id=to_id))
-            form.save()
-
-        return super().post(request, *args, **kwargs)
