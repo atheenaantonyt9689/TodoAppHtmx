@@ -72,7 +72,7 @@ def add_to_items(request):
         context = {}
         to_item = request.POST.get('title')
         due_date = request.POST.get('due_date')
-        print("due_date ", due_date)
+        print("hidden_due_date ", due_date)
         if len(to_item) > 0:
             to_do_obj = TodoItem.objects.create(title=to_item)
             if due_date:
