@@ -35,12 +35,12 @@ class IndexView(TemplateView):
             print("htmx request")
             to_do_list = TodoItem.objects.all()
             context = {'to_do_list': to_do_list}
-            return render(request, 'htmx_todo_app/partials/to_do_management.html', context)
+            return render(request, 'htmx_todo_app/todo_functionality/partials/to_do_management.html', context)
         return super().get(request, *args, **kwargs)
 
 
 class TodoManagementView(ListView):
-    template_name = 'htmx_todo_app/to_do_management.html'
+    template_name = 'htmx_todo_app/todo_functionality/to_do_management.html'
     model = TodoItem
     paginate_by = 5
 
@@ -81,7 +81,7 @@ class TodoManagementView(ListView):
                     if sorting_with_date == 'due-date-desc':
                         to_dos = to_dos.filter(Q(due_date__lte=today_dateobj) | Q(due_date__gte=today_dateobj)).order_by('due_date')
 
-            self.template_name = 'htmx_todo_app/partials/to_do_management.html'
+            self.template_name = 'htmx_todo_app/todo_functionality/partials/to_do_management.html'
         return to_dos
 
 
@@ -99,7 +99,7 @@ def add_to_items(request):
                 to_do_obj.due_date = due_date
             to_do_obj.save()
         context['object_list'] = TodoItem.objects.all()
-    return render(request, 'htmx_todo_app/partials/to_do_management.html', context=context)
+    return render(request, 'htmx_todo_app/todo_functionality/partials/to_do_management.html', context=context)
 
 
 def delete_to_item(request, pk):
@@ -108,7 +108,7 @@ def delete_to_item(request, pk):
     if pk:
         TodoItem.objects.filter(id=pk).delete()
     context['object_list'] = TodoItem.objects.all()
-    return render(request, 'htmx_todo_app/partials/to_do_management.html', context=context)
+    return render(request, 'htmx_todo_app/todo_functionality/partials/to_do_management.html', context=context)
 
 
 def update_status(request, pk):
@@ -123,7 +123,7 @@ def update_status(request, pk):
 
         todo_obj.save()
     context['object_list'] = TodoItem.objects.all()
-    return render(request, 'htmx_todo_app/partials/to_do_management.html', context=context)
+    return render(request, 'htmx_todo_app/todo_functionality/partials/to_do_management.html', context=context)
 
 
 def update_to_do_item_title_and_due_date(request, id):
@@ -137,7 +137,7 @@ def update_to_do_item_title_and_due_date(request, id):
         todo_obj.save()
     print("Title saved successfully")
     context['object_list'] = TodoItem.objects.all()
-    return render(request, 'htmx_todo_app/partials/to_do_management.html', context=context)
+    return render(request, 'htmx_todo_app/todo_functionality/partials/to_do_management.html', context=context)
 
 
 def update_due_date(request,pk):
@@ -153,7 +153,7 @@ def update_due_date(request,pk):
         todo_obj.save()
     print("Title savedd successfully")
     context['object_list'] = TodoItem.objects.all()
-    return render(request, 'htmx_todo_app/partials/to_do_management.html', context=context)
+    return render(request, 'htmx_todo_app/todo_functionality/partials/to_do_management.html', context=context)
 
 
 class SearchSampleIndexView(ListView):

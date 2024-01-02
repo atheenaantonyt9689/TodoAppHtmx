@@ -1,0 +1,177 @@
+<div class="col mx-auto">
+            <!-- Todo Item 1 -->
+            {% for todo in object_list %}
+               {% comment %} {% if page_obj.has_next %}{% endcomment %}
+            <div class="row px-3 align-items-center todo-item rounded" {% if forloop.last and page_obj.has_next %}
+         hx-get="{% url 'htmx_todo_app_search_sample' %}?page={{ page_obj.next_page_number }}" hx-trigger="revealed"
+         hx-swap="afterend"  {% endif %}>
+                <div class="col-auto m-1 p-0 d-flex align-items-center">
+                    <h2 class="m-0 p-0">
+                        <i class="fa fa-square-o text-primary btn m-0 p-0 d-none" data-toggle="tooltip" data-placement="bottom" title="Mark as complete"></i>
+                        <i class="fa fa-check-square-o text-primary btn m-0 p-0" data-toggle="tooltip" data-placement="bottom" title="Mark as todo"></i>
+                    </h2>
+                </div>
+                <div class="col px-1 m-1 d-flex align-items-center">
+                    <input type="text" class="form-control form-control-lg border-0 edit-todo-input bg-transparent rounded px-3" readonly value="{{ todo.title }}" title="Buy groceries for next week" />
+                    <input type="text" class="form-control form-control-lg border-0 edit-todo-input rounded px-3 d-none" value="Buy groceries for next week" />
+                </div>
+                <div class="col-auto m-1 p-0 px-3 d-none">
+                </div>
+                <div class="col-auto m-1 p-0 todo-actions">
+                    <div class="row d-flex align-items-center justify-content-end">
+                        <h5 class="m-0 p-0 px-2">
+                            <i class="fa fa-pencil text-info btn m-0 p-0" data-toggle="tooltip" data-placement="bottom" title="Edit todo" id="edit_btn"  data-id="edit_btn_{{ todo.id }}" {% comment %}hx-trigger="click[checkGlobalState()]"{% endcomment %}></i>
+                        </h5>
+                        <h5 class="m-0 p-0 px-2">
+
+                            <label for="due_date" class="text-secondary my-2 p-0 px-1 view-opt-label due-date-label_edit d-none" id ="due-date-label_edit_{{ todo.id }}">Due date
+                                not set</label>
+                                 <input type="hidden" name="due_date" id="due_date">
+                            <i class="fa fa-calendar my-2 px-1 text-primary btn due-date-button-edit" id="cal_edit_id_{{ todo.id }}"  data-calendar-id="due-date-button-edit_{{ todo.id }}" data-toggle="tooltip"
+                               data-placement="bottom" title="Set a Due date" hx-on:click="calendarLoad({{ todo.id }})"></i>
+                            <i class="fa fa-calendar-times-o my-2 px-1 text-danger btn clear-due-date-button-edit d-none"
+                               data-toggle="tooltip" data-placement="bottom" title="Clear Due date"></i>
+
+                            <i class="fa fa-trash-o text-danger btn m-0 p-0" data-toggle="tooltip" data-placement="bottom" title="Delete todo"></i>
+                        </h5>
+                    </div>
+                    <div class="row todo-created-info">
+                        <div class="col-auto d-flex align-items-center pr-2">
+                            <i class="fa fa-info-circle my-2 px-2 text-black-50 btn" data-toggle="tooltip" data-placement="bottom" title="" data-original-title="Created date"></i>
+                            <label class="date-label my-2 text-black-50">28th Jun 2020</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+               {% comment %} {% endif %}{% endcomment %}
+            {% endfor %}
+
+
+ </div>
+
+<script>
+
+    function calendarLoad(cal_edit_id)
+
+    {
+        var calendar_btn = $(`#cal_edit_id_${cal_edit_id}`)
+        console.log("calendarLoad", cal_edit_id);
+        calendar_btn.datepicker({
+            format: "YYYY-MM-DD",
+            autoclose: true,
+            todayHighlight: true,
+            startDate: formatDate(new Date()),
+            orientation: "bottom right"
+        });
+
+        function formatDate(date) {
+        return (
+             date.getFullYear() +
+            "-" +
+            (date.getMonth() + 1) +
+            "-" +
+            date.getDate()
+
+        );
+    }
+    calendar_btn.on("click", function (event) {
+        calendar_btn.datepicker("show")
+            .on("changeDate", function (dateChangeEvent) {
+                calendar_btn.datepicker("hide");
+                $(`#due-date-label_edit_${cal_edit_id}`).text(formatDate(dateChangeEvent.date));
+            //     set value of hidden_due_date to the date selected
+                $("#due_date").val(formatDate(dateChangeEvent.date));
+               //  show the due-date-label
+               $(`#due-date-label_edit_${cal_edit_id}`).removeClass('d-none');
+            });
+    });
+
+
+
+
+
+{% comment %}
+       var date = new Date();
+        $(".due-date-button-edit").datepicker({
+            format: "YYYY-MM-DD",
+            autoclose: true,
+            todayHighlight: true,
+            startDate: date,
+            orientation: "bottom right"
+        });
+
+
+        $(".due-date-button-edit").on("click", function (event) {
+        $(".due-date-button-edit")
+            .datepicker("show")
+            .on("changeDate", function (dateChangeEvent) {
+                $(".due-date-button-edit").datepicker("hide");
+                $(".due-date-label-edit").text(formatDate(dateChangeEvent.date));
+            //     set value of hidden_due_date to the date selected
+                $("#due_date").val(formatDate(dateChangeEvent.date));
+               //  show the due-date-label
+               $('.due-date-label').removeClass('d-none');
+            });
+    });
+{% endcomment %}
+
+
+    }
+
+
+{% comment %}
+
+    $('[data-toggle="tooltip"]').tooltip()
+    console.log("Hello World");
+
+    /*function formatDate(date) {
+        return (
+            date.getDate() +
+            "/" +
+            (date.getMonth() + 1) +
+            "/" +
+            date.getFullYear()
+        );
+    }*/
+
+    function formatDate(date) {
+        return (
+             date.getFullYear() +
+            "-" +
+            (date.getMonth() + 1) +
+            "-" +
+            date.getDate()
+
+        );
+    }
+
+    var currentDate = formatDate(new Date());
+
+    $(".due-date-button-edit").datepicker({
+        format: "YYYY-MM-DD",
+        autoclose: true,
+        todayHighlight: true,
+        startDate: currentDate,
+        orientation: "bottom right"
+    });
+
+    // var date = new Date();
+
+    $(".due-date-button-edit").on("click", function (event) {
+        $(".due-date-button-edit")
+            .datepicker("show")
+            .on("changeDate", function (dateChangeEvent) {
+                $(".due-date-button-edit").datepicker("hide");
+                $(".due-date-label-edit").text(formatDate(dateChangeEvent.date));
+            //     set value of hidden_due_date to the date selected
+                $("#due_date").val(formatDate(dateChangeEvent.date));
+               //  show the due-date-label
+               $('.due-date-label').removeClass('d-none');
+            });
+    });
+
+{% endcomment %}
+
+
+
+</script>

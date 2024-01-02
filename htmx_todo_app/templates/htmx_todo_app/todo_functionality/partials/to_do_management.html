@@ -1,3 +1,5 @@
+
+
 {% for item in object_list %}
 
     <div class="row px-3 align-items-center todo-item rounded" {% if forloop.last and page_obj.has_next %}
@@ -83,8 +85,8 @@
 
     </div>
 {% endfor %}
-
-
+{% comment %}{% block javascript %}
+{{ block.super }}{% endcomment %}
 <script>
 
    function updateDueDate(itemId,dueDate) {
@@ -148,4 +150,5 @@
 
    }
 </script>
+{% comment %}{% endblock javascript %}{% endcomment %}
 
