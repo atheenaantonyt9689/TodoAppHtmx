@@ -47,6 +47,23 @@
         <div class="col-auto m-1 p-0 ">
             <div class="row d-flex align-items-center justify-content-end">
 
+                <a {% comment %}hx-get="{% url 'htmx_todo_app_delete' item.pk %}"
+                   hx-confirm="Are you sure you want to delete this {{ item.title }}?"
+                   hx-target="#item_list" hx-swap="innerHtml"{% endcomment %}>
+                    <h5 class="m-0 p-0 px-2">
+                            <i class="fa fa-pencil text-info btn m-0 p-0" data-toggle="tooltip" data-placement="bottom" title="Edit todo" id="edit_btn_{{ item.id }}"  data-id="edit_btn_{{ item.id }}" hx-on:click="updateDueDate({{ item.id }},{% if item.due_date %}'{{ item.due_date }}'{% else %}null{% endif %})"></i>
+                            <label for="due_date" class="text-secondary my-2 p-0 px-1 view-opt-label due-date-label_edit d-none" id ="due-date-label_edit_{{ item.id }}">Due date
+                                not set</label>
+                                 <input type="hidden" name="due_date" id="due_date">
+                            <i class="fa fa-calendar my-2 px-1 text-primary btn due-date-button-edit d-none " id="cal_edit_id_{{ item.id }}"  data-calendar-id="due-date-button-edit_{{ item.id }}" data-toggle="tooltip"
+                               data-placement="bottom" title="Set a Due date" {% comment %}hx-on:click="calendarLoad({{ item.id }})"{% endcomment %}></i>
+                            <i class="fa fa-calendar-times-o my-2 px-1 text-danger btn clear-due-date-button-edit d-none"
+                               data-toggle="tooltip" data-placement="bottom" title="Clear Due date"></i>
+                    </h5>
+                </a>
+
+
+
                 <a hx-get="{% url 'htmx_todo_app_delete' item.pk %}"
                    hx-confirm="Are you sure you want to delete this {{ item.title }}?"
                    hx-target="#item_list" hx-swap="innerHtml">
@@ -69,12 +86,66 @@
 
 
 <script>
-    document.addEventListener("htmx:afterOnLoad", function(event) {
-        console.log("htmx:afterOnLoad", event.detail.elt);
-    // Clear the input fields after the form submission
-    document.getElementById('title').value = '';
-    document.getElementById('due_date').value = '';
-});
 
+   function updateDueDate(itemId,dueDate) {
+       console.log("updateDueDate worked");
+       console.log("dueDate ",dueDate)
+       var new_date = new Date();
+       var already_selected_date = new Date(dueDate);
+       console.log("new_date", new_date);
+         console.log("already_selected_date", already_selected_date);
+       {% comment %}/for the calendar to show the already selected date
+       var artDate;
+       if (already_selected_date) {
+            artDate = already_selected_date;
+            console.log("artDate already ", artDate);
+       } else {
+            artDate = new_date;
+       }{% endcomment %}
+
+       // add the class 'd-none' to the element with the id
+         htmx.addClass(htmx.find(`#edit_btn_${ itemId }`), 'd-none');
+         htmx.removeClass(htmx.find(`#cal_edit_id_${itemId}`), 'd-none');
+        var calendar_btn = $(`#cal_edit_id_${itemId}`)
+        console.log("calendarLoad", itemId);
+        calendar_btn.datepicker({
+            format: "YYYY-MM-DD",
+            autoclose: true,
+            todayHighlight: true,
+            startDate: new_date,
+            orientation: "bottom right"
+        });
+
+        function formatDate(date) {
+        return (
+             date.getFullYear() +
+            "-" +
+            (date.getMonth() + 1) +
+            "-" +
+            date.getDate()
+
+        );
+    }
+    calendar_btn.on("click", function (event) {
+        calendar_btn.datepicker("show")
+            .on("changeDate", function (dateChangeEvent) {
+                calendar_btn.datepicker("hide");
+                $(`#due-date-label_edit_${itemId}`).text(formatDate(dateChangeEvent.date));
+            //     set value of hidden_due_date to the date selected
+                $("#due_date").val(formatDate(dateChangeEvent.date));
+               //  show the due-date-label
+               $(`#due-date-label_edit_${itemId}`).removeClass('d-none');
+               //set value of hidden_due_date to the date selected
+               var due_date = formatDate(dateChangeEvent.date);
+               console.log("due_date", due_date);
+               var url = "{% url 'htmx_todo_app_update_due_date' 0 %}";
+               // replace the /0 at the end of the url with the item id
+                url = url.replace(/\/0$/, `/${itemId}`);
+              htmx.ajax('GET', url, {target: '#item_list', swap: 'innerHtml', values: {due_date: due_date}});
+            });
+    });
+
+
+   }
 </script>
 

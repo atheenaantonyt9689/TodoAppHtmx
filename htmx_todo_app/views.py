@@ -1,3 +1,9 @@
+import datetime
+from django.utils import timezone
+from django.db.models import Q
+
+
+
 from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse_lazy
@@ -48,19 +54,33 @@ class TodoManagementView(ListView):
             print("htmx request received")
             print(to_dos)
             to_do_status = self.request.GET.get('to_status_filter', None)
+            print("to_do_status ", to_do_status)
             sorting_with_date = self.request.GET.get('sorting_with_date', None)
-            print("to_status_filter ", to_do_status)
-            if to_do_status == '0':
-                to_dos = to_dos  #
-            if to_do_status is not None and to_do_status != '0':
-                to_dos = to_dos.filter(status=to_do_status)
-            #     Sorting
+            ascending = self.request.GET.get('ascending', None)
+            print("ascendingffffffffffffffffffffffffffffffff ", ascending)
             print("sorting_with_date ", sorting_with_date)
-            if sorting_with_date is not None:
-                if sorting_with_date == 'due-date-desc':
-                    to_dos = to_dos.order_by('-due_date')
+            today_dateobj = datetime.date.today()
+
+            if to_do_status == '0' and to_do_status is not None:
+                to_dos = to_dos  #
                 if sorting_with_date == 'created-date-asc':
-                    to_dos = to_dos.order_by('created')
+                    to_dos = to_dos.filter(created__lte=timezone.now()).order_by('created')
+                if sorting_with_date == 'due-date-desc':
+                    to_dos = to_dos.filter(due_date__gte=today_dateobj).order_by('due_date')
+            elif(to_do_status is not None and to_do_status != '0'):
+                if to_do_status == 'has-due-date':
+                    to_dos = to_dos.filter(due_date__gte=today_dateobj)
+                    if sorting_with_date == 'due-date-desc':
+                        to_dos = to_dos.filter(Q(due_date__lte=today_dateobj) | Q(due_date__gte=today_dateobj)).order_by('due_date')
+                    if sorting_with_date == 'created-date-asc':
+                        to_dos = to_dos.filter(created__lte=timezone.now()).order_by('created')
+                else:
+                    to_dos = to_dos.filter(status=to_do_status)
+                    if sorting_with_date == 'created-date-asc':
+                        to_dos = to_dos.filter(created__lte=timezone.now()).order_by('created')
+                    if sorting_with_date == 'due-date-desc':
+                        to_dos = to_dos.filter(Q(due_date__lte=today_dateobj) | Q(due_date__gte=today_dateobj)).order_by('due_date')
+
             self.template_name = 'htmx_todo_app/partials/to_do_management.html'
         return to_dos
 
@@ -115,7 +135,46 @@ def update_to_do_item_title_and_due_date(request, id):
         if len(title) > 0:
             todo_obj.title = title
         todo_obj.save()
+    print("Title saved successfully")
+    context['object_list'] = TodoItem.objects.all()
+    return render(request, 'htmx_todo_app/partials/to_do_management.html', context=context)
+
+
+def update_due_date(request,pk):
+    print("update_due_date")
+    context = {}
+    id = pk
+    if id:
+        todo_obj = TodoItem.objects.filter(id=int(id)).first()
+        due_date = request.GET.get('due_date')
+        print("due_date ", due_date)
+        if len(due_date) > 0:
+            todo_obj.due_date = due_date
+        todo_obj.save()
     print("Title savedd successfully")
     context['object_list'] = TodoItem.objects.all()
     return render(request, 'htmx_todo_app/partials/to_do_management.html', context=context)
+
+
+class SearchSampleIndexView(ListView):
+    template_name = 'htmx_todo_app/search/search_sample.html'
+    model = TodoItem
+    paginate_by = 4
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        return super().get_context_data(object_list=object_list, **kwargs)
+
+    def get_queryset(self):
+        to_do_list = TodoItem.objects.all().order_by('created')
+        if self.request.htmx:
+            print("htmx request received")
+            search_text = self.request.GET.get('search_text')
+            print("search_text ", to_do_list)
+            if len(search_text) > 0:
+                to_do_list = to_do_list.filter(title__icontains=search_text).order_by('created')
+            self.template_name = 'htmx_todo_app/search/partials/search_sample.html'
+        return to_do_list
+
+
+
 
