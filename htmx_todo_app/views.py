@@ -174,6 +174,10 @@ class SearchSampleIndexView(ListView):
                 to_do_list = to_do_list.filter(title__icontains=search_text).order_by('created')
             self.template_name = 'htmx_todo_app/search/partials/search_sample.html'
         return to_do_list
+    def get_sample_data(self):
+        to_do_list = TodoItem.objects.all().order_by('created')
+        print("htmx request received")
+
 
 
 
